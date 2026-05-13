@@ -13,6 +13,7 @@ Even on the "Latest" tab, Twitter's profile and reply views re-rank by engagemen
 - On a user profile (`/<username>`, `/<username>/with_replies`, `/<username>/media`, …) — sorts the timeline.
 - On a tweet detail page (`/<username>/status/<id>`) — sorts the reply list; the original tweet stays pinned at the top.
 - Everywhere else (home feed, explore, notifications, messages, settings, modal photo views) — does nothing.
+- Your last-chosen sort direction is remembered across page reloads, new tabs, and browser restarts (via `chrome.storage.local`). To stop sorting, pick "默认顺序" — the choice itself is what's persisted.
 
 ## Install (developer mode)
 

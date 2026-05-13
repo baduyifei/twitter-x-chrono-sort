@@ -95,6 +95,45 @@
   }
 
   // ====================================================================
+  // 持久化：将用户选择的排序方向存到 chrome.storage.local
+  // 仅持久化 mode（'off' / 'newest' / 'oldest'），pageType 由 URL 推导，不存
+  // ====================================================================
+  const STORAGE_KEY = 'xcsMode';
+  const VALID_MODES = new Set(['off', 'newest', 'oldest']);
+
+  function loadPersistedMode() {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get(STORAGE_KEY, (result) => {
+          if (chrome.runtime.lastError) {
+            LOG('storage read failed:', chrome.runtime.lastError.message);
+            resolve('off');
+            return;
+          }
+          const m = result?.[STORAGE_KEY];
+          resolve(VALID_MODES.has(m) ? m : 'off');
+        });
+      } catch (e) {
+        LOG('storage read threw:', e?.message);
+        resolve('off');
+      }
+    });
+  }
+
+  function persistMode(mode) {
+    if (!VALID_MODES.has(mode)) return;
+    try {
+      chrome.storage.local.set({ [STORAGE_KEY]: mode }, () => {
+        if (chrome.runtime.lastError) {
+          LOG('storage write failed:', chrome.runtime.lastError.message);
+        }
+      });
+    } catch (e) {
+      LOG('storage write threw:', e?.message);
+    }
+  }
+
+  // ====================================================================
   // 时间线排序核心
   // ====================================================================
   const SEL_CELL = '[data-testid="cellInnerDiv"]';
@@ -284,6 +323,7 @@
     refreshUI();
     closeMenu();
     applySortMode();
+    persistMode(mode);
   }
 
   function refreshUI() {
@@ -318,7 +358,7 @@
     LOG('content script loaded at', location.href);
     buildUI();
     state.pageType = detectPageType();
-    applyPageVisibility();
+    applyPageVisibility(); // 先以默认 off 状态渲染
     LOG('page type:', state.pageType);
 
     observeRouteChanges((from, to) => {
@@ -326,6 +366,16 @@
       state.pageType = detectPageType();
       LOG('route', from, '→', to, '| type', prev, '→', state.pageType);
       applyPageVisibility();
+    });
+
+    // 异步恢复持久化的排序偏好（避免阻塞 UI 出现）
+    loadPersistedMode().then((saved) => {
+      if (saved !== state.mode) {
+        state.mode = saved;
+        refreshUI();
+        applyPageVisibility(); // 若 saved != 'off' 且在可排序页面，会延迟激活排序
+      }
+      LOG('restored mode:', state.mode);
     });
   }
 

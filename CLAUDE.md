@@ -29,8 +29,9 @@ Everything lives in `content.js`, sectioned by `// ====` banners. The order matt
      - `ORIGINAL_SENTINEL = -2_147_483_647` — pins the original tweet on status pages to the very top, identified via `article[tabindex="-1"]` (Twitter sets this on the focused/main tweet).
      - `SENTINEL_END = 2_000_000_000` — sinks cells with no timestamp (reply input, "show more" buttons, dividers) to the bottom.
    - **MutationObserver** on the container handles cells that arrive after sort is enabled (scroll-load, lazy timestamps). It re-uses one observer instance and re-`observe()`s when the container changes (SPA navigation between profiles).
-5. **UI** — fixed-position floating button (`#xcs-root`) in the bottom-right. All DOM/CSS uses an `xcs-` prefix to avoid colliding with Twitter. Click-outside closes the menu via a capture-phase listener on `document`.
-6. **Boot** — runs once at `document_idle`; calls `buildUI()`, sets initial pageType, hooks route observer.
+5. **Persistence** — only `state.mode` is persisted, under key `xcsMode` in `chrome.storage.local`. `loadPersistedMode()` is async and validates against `VALID_MODES` (treats anything else as `'off'`); `persistMode()` rejects invalid input. `state.pageType` is *not* persisted — always re-derived from URL.
+6. **UI** — fixed-position floating button (`#xcs-root`) in the bottom-right. All DOM/CSS uses an `xcs-` prefix to avoid colliding with Twitter. Click-outside closes the menu via a capture-phase listener on `document`.
+7. **Boot** — runs once at `document_idle`; calls `buildUI()`, sets initial pageType, hooks route observer, *then* asynchronously restores the persisted mode and re-applies visibility (this is why boot first renders in `'off'` and may switch a beat later — avoids blocking the FAB on storage I/O).
 
 ## Fragile selectors
 
