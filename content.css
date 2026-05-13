@@ -1,0 +1,133 @@
+/* ============================================================
+ * X Chrono Sort — floating button UI
+ * 所有选择器都以 xcs- 前缀，避免与 Twitter/X 自身样式冲突。
+ * ============================================================ */
+
+#xcs-root {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483000; /* 大于 Twitter 模态层即可 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #0f1419;
+  user-select: none;
+}
+
+#xcs-fab {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #1d9bf0;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease;
+  padding: 0;
+}
+
+#xcs-fab:hover {
+  background: #1a8cd8;
+  transform: translateY(-1px);
+}
+
+#xcs-fab.xcs-fab-active {
+  background: #00ba7c;
+}
+
+#xcs-fab svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+#xcs-menu {
+  position: absolute;
+  right: 0;
+  bottom: 60px;
+  min-width: 168px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#xcs-menu[hidden] {
+  display: none;
+}
+
+.xcs-opt {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.xcs-opt:hover {
+  background: #eff3f4;
+}
+
+.xcs-opt.xcs-active {
+  background: #e8f5fe;
+  color: #1d9bf0;
+  font-weight: 600;
+}
+
+.xcs-opt-icon {
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
+}
+
+/* ============================================================
+ * 排序激活时覆盖 Twitter 虚拟列表的 transform 定位
+ * 思路：把虚拟列表容器改成 flex column，每个 cell 取消绝对定位，
+ *       通过 style.order 控制视觉顺序而不改 DOM 顺序，避免与 React reconcile 打架。
+ * ============================================================ */
+
+.xcs-sorted {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.xcs-sorted > [data-testid="cellInnerDiv"] {
+  position: static !important;
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+}
+
+/* 深色模式（Twitter 暗色主题下）—— 根据 prefers-color-scheme 简单处理 */
+@media (prefers-color-scheme: dark) {
+  #xcs-menu {
+    background: #15202b;
+    color: #e7e9ea;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+  .xcs-opt:hover {
+    background: #1e2732;
+  }
+  .xcs-opt.xcs-active {
+    background: rgba(29, 155, 240, 0.12);
+  }
+}
