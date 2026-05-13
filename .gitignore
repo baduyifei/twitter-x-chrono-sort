@@ -13,3 +13,6 @@
 # Local dev artifacts
 .cache/
 node_modules/
+
+# Build artifacts
+*.zip
